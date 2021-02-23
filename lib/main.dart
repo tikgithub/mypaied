@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(MyApp());
@@ -11,10 +12,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.red,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
+      theme: ThemeData(),
       home: MyHomePage(title: 'My Paid'),
     );
   }
@@ -30,20 +28,22 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Center(child: Text(widget.title),),
-        actions: [
-          IconButton(icon: Icon(Icons.power_settings_new_outlined), onPressed: (){},)
-        ],
-      ),
-      body: SafeArea(
-        child: Text('Body'),
-      ),
-    );
+        appBar: AppBar(
+          elevation: 0.0,
+          backgroundColor: Colors.transparent,
+          bottomOpacity: 0.0,
+        ),
+        extendBodyBehindAppBar: true,
+        backgroundColor: Colors.transparent,
+        body: Container(
+            child: Image.asset(
+          'images/mbbackground.jpeg',
+          fit: BoxFit.cover,
+          height: double.infinity,
+          width: double.infinity,
+        )));
   }
 }
