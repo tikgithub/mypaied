@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mypaied/screen/loginscreen.dart';
 
 void main() {
   runApp(MyApp());
@@ -32,18 +33,11 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          elevation: 0.0,
+          elevation: 0,
           backgroundColor: Colors.transparent,
-          bottomOpacity: 0.0,
         ),
         extendBodyBehindAppBar: true,
         backgroundColor: Colors.transparent,
-        body: Container(
-            child: Image.asset(
-          'images/mbbackground.jpeg',
-          fit: BoxFit.cover,
-          height: double.infinity,
-          width: double.infinity,
-        )));
+        body: LoginScreen());
   }
 }
