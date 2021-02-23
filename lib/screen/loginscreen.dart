@@ -27,6 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Container(
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         TextFormField(
+          style: TextStyle(fontSize: 18),
           keyboardType: TextInputType.text,
           textAlign: TextAlign.center,
           decoration: InputDecoration(
