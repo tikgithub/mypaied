@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mypaied/widget/successdialog.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 
+import 'loginscreen.dart';
+
 class Register extends StatefulWidget {
   @override
   _RegisterState createState() => _RegisterState();
@@ -15,7 +17,6 @@ class _RegisterState extends State<Register> {
   String email;
   String password;
   String password2;
-  var dialog = new MyAlertDialog();
   ProgressDialog pr;
   final TextEditingController _pass1 = TextEditingController();
   final formKey = GlobalKey<FormState>();
@@ -38,6 +39,50 @@ class _RegisterState extends State<Register> {
         ),
       ),
     );
+  }
+
+  void showSuccessDialog(String title, String content) {
+    showDialog(
+        context: context,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            title: ListTile(
+              leading: Icon(
+                Icons.done_all_outlined,
+                color: Colors.green,
+                size: 40,
+              ),
+              title: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            content: Text(
+              content,
+              textAlign: TextAlign.end,
+            ),
+            actions: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  RaisedButton(
+                    onPressed: () {
+                      MaterialPageRoute pageRoute =
+                          MaterialPageRoute(builder: (value) => LoginScreen());
+                      Navigator.of(context)
+                          .pushAndRemoveUntil(pageRoute, (route) => false);
+                    },
+                    child: Text('OK'),
+                    color: Colors.blueGrey,
+                  )
+                ],
+              ),
+            ],
+          );
+        });
   }
 
   Widget showImageSelector() {
@@ -177,8 +222,8 @@ class _RegisterState extends State<Register> {
         Duration(milliseconds: 1000),
       ).then((v) {
         pr.hide();
-        dialog.showSuccessDialog(
-            context, 'Done', 'User Registeration Completed');
+        showSuccessDialog('Done',
+            'User registeration completed, try again when login screen');
       });
     }).catchError((response) {
       print('error');
