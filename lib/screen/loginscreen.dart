@@ -114,8 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget showContent() {
     return Container(
       child: Stack(
         children: [
@@ -152,6 +151,18 @@ class _LoginScreenState extends State<LoginScreen> {
           )
         ],
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+      ),
+      body: showContent(),
     );
   }
 }
