@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:mypaied/screen/register.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+
+import 'home.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -98,19 +102,22 @@ class _LoginScreenState extends State<LoginScreen> {
           onPressed: () {
             if (formKey.currentState.validate()) {
               formKey.currentState.save();
-              print('username: ' +
-                  txtUsername.text +
-                  ' password: ' +
-                  txtPassword.text);
-              progressDialog.show();
-              Future.delayed(Duration(milliseconds: 500)).then((value) {
-                progressDialog.hide();
+              FirebaseAuth auth = FirebaseAuth.instance;
+              auth
+                  .signInWithEmailAndPassword(
+                      email: txtUsername.text.trim(),
+                      password: txtPassword.text.trim())
+                  .then((value) {
+                hideProgress();
+                MaterialPageRoute route =
+                    MaterialPageRoute(builder: (value) => Home());
+                Navigator.of(context)
+                    .pushAndRemoveUntil(route, (route) => false);
+              }).catchError((error) {
+                hideProgress();
+                showLoginExceptionDialog(error.code, error.message);
               });
             }
-            // MaterialPageRoute materialPageRoute =
-            //     MaterialPageRoute(builder: (value) => Home());
-            // Navigator.of(context)
-            //     .pushAndRemoveUntil(materialPageRoute, (route) => false);
           },
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -128,34 +135,51 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget showRegisterButton() {
-    return Container(
-      margin: EdgeInsets.only(top: 10),
-      width: double.infinity,
-      child: RaisedButton(
-        color: Colors.grey.shade500,
-        padding: EdgeInsets.all(15),
-        onPressed: () {
-          MaterialPageRoute materialPageRoute =
-              MaterialPageRoute(builder: (value) => Register());
-          Navigator.of(context)
-              .pushAndRemoveUntil(materialPageRoute, (route) => false);
-        },
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.app_registration),
-            SizedBox(
-              width: 10,
+  void showLoginExceptionDialog(String code, String content) {
+    showDialog(
+        context: context,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            elevation: 3,
+            content: Column(
+              children: [
+                Icon(
+                  Icons.lock_clock,
+                  color: Colors.redAccent,
+                  size: 60,
+                ),
+                Text(content)
+              ],
+              mainAxisSize: MainAxisSize.min,
             ),
-            Text(
-              'Register',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Login failed '),
+                SizedBox(height: 10,),
+                Container(
+                  height: 1,
+                  color: Colors.black38,
+                )
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+            actions: [
+              RaisedButton(
+                color: Colors.blueGrey,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              )
+            ],
+          );
+        });
+  }
+
+  void hideProgress() {
+    Future.delayed(
+      Duration(milliseconds: 500),
+    ).then((value) => progressDialog.hide());
   }
 
   Widget showContent() {
@@ -189,7 +213,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           showUsername(),
                           showPassword(),
                           showLoginButton(),
-                          showRegisterButton(),
                         ],
                       )),
                 ),
@@ -228,12 +251,30 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),
       body: showContent(),
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.blueGrey,
+        child: Container(
+          height: 50.0,
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        label: Text('Register'),
+        icon: Icon(Icons.app_registration),
+        onPressed: () {
+          MaterialPageRoute materialPageRoute =
+              MaterialPageRoute(builder: (value) => Register());
+          Navigator.of(context)
+              .pushAndRemoveUntil(materialPageRoute, (route) => false);
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }

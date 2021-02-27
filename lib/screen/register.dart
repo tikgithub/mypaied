@@ -182,8 +182,8 @@ class _RegisterState extends State<Register> {
         validator: (String value) {
           if (value.isEmpty) {
             return 'Please fill to confirm the password';
-          } else if ((value != _pass1.text)) {
-            return 'Password 1 = $value and $password2';
+          } else if ((value.toString() != _pass1.text)) {
+            return 'Password 1 = $value and ${_pass1.text}';
           } else {
             return null;
           }
@@ -202,9 +202,10 @@ class _RegisterState extends State<Register> {
         color: Colors.blueGrey,
         child: Text('Register'),
         onPressed: () {
-          pr.show();
+          //pr.show();
           if (formKey.currentState.validate()) {
             formKey.currentState.save();
+            pr.show();
             register();
           }
         },
@@ -214,11 +215,11 @@ class _RegisterState extends State<Register> {
 
   Future<void> register() async {
     FirebaseAuth auth = FirebaseAuth.instance;
-    auth
+    await auth
         .createUserWithEmailAndPassword(email: email, password: password)
         .then((response) {
       Future.delayed(
-        Duration(milliseconds: 1000),
+        Duration(milliseconds: 500),
       ).then((v) {
         pr.hide();
         showSuccessDialog('Done',
