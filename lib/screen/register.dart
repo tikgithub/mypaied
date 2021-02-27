@@ -2,7 +2,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:mypaied/screen/loginscreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:mypaied/widget/successdialog.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 
 import 'loginscreen.dart';
