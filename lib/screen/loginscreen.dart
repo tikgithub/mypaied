@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +20,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController txtPassword = TextEditingController();
 
   final formKey = GlobalKey<FormState>();
+
+  FirebaseAuth auth;
 
   //Progressbar dialog
   ProgressDialog progressDialog;
@@ -156,7 +156,9 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Login failed '),
-                SizedBox(height: 10,),
+                SizedBox(
+                  height: 10,
+                ),
                 Container(
                   height: 1,
                   color: Colors.black38,
@@ -232,7 +234,14 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    Firebase.initializeApp();
+    Firebase.initializeApp().then((value) {
+      auth = FirebaseAuth.instance;
+      var user = auth.currentUser;
+      if (user != null) {
+        MaterialPageRoute route = MaterialPageRoute(builder: (value) => Home());
+        Navigator.of(context).pushAndRemoveUntil(route, (value) => false);
+      }
+    });
   }
 
   @override

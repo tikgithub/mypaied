@@ -1,10 +1,15 @@
+import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:mypaied/model/user.dart';
 import 'package:mypaied/screen/loginscreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:progress_dialog/progress_dialog.dart';
-
+import 'package:uuid/uuid.dart';
 import 'loginscreen.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class Register extends StatefulWidget {
   @override
@@ -19,6 +24,11 @@ class _RegisterState extends State<Register> {
   ProgressDialog pr;
   final TextEditingController _pass1 = TextEditingController();
   final formKey = GlobalKey<FormState>();
+  firebase_storage.FirebaseStorage storage;
+  FirebaseFirestore firestore;
+
+  //Holding image data when select
+  File imageFile;
 
 //Method define
   Widget showContent() {
@@ -87,14 +97,19 @@ class _RegisterState extends State<Register> {
   Widget showImageSelector() {
     return Container(
       padding: EdgeInsets.all(10),
-      child: Image.asset(
-        'images/avatar.png',
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.width * 0.5,
-      ),
+      child: imageFile == null
+          ? Image.asset(
+              'images/avatar.png',
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.width * 0.5,
+            )
+          : Image.file(imageFile,
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.width * 0.5),
     );
   }
 
+//Camera and folder image button Widget
   Widget showImageControlButton() {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -104,7 +119,9 @@ class _RegisterState extends State<Register> {
             Icons.camera,
             size: 50,
           ),
-          onPressed: () {},
+          onPressed: () {
+            chooseImageSource(ImageSource.camera);
+          },
         ),
         SizedBox(
           width: 50,
@@ -115,7 +132,9 @@ class _RegisterState extends State<Register> {
             size: 50,
             color: Colors.yellow.shade800,
           ),
-          onPressed: () {},
+          onPressed: () {
+            chooseImageSource(ImageSource.gallery);
+          },
         ),
       ],
     );
@@ -150,6 +169,7 @@ class _RegisterState extends State<Register> {
       margin: EdgeInsets.only(top: 10),
       padding: EdgeInsets.only(left: 10, right: 10),
       child: TextFormField(
+        obscureText: true,
         decoration: InputDecoration(
           hintText: 'Password',
         ),
@@ -173,6 +193,7 @@ class _RegisterState extends State<Register> {
       margin: EdgeInsets.only(top: 10),
       padding: EdgeInsets.only(left: 10, right: 10),
       child: TextFormField(
+        obscureText: true,
         decoration: InputDecoration(
           hintText: 'Re-Password',
         ),
@@ -202,35 +223,82 @@ class _RegisterState extends State<Register> {
         color: Colors.blueGrey,
         child: Text('Register'),
         onPressed: () {
-          //pr.show();
+          if (imageFile == null) {
+            showAlertDialog('Please check your profile photo');
+            return;
+          }
           if (formKey.currentState.validate()) {
             formKey.currentState.save();
             pr.show();
-            register();
+            //Define new UUID
+            var uuid = Uuid();
+            // Create new filename with random string
+            String newName = uuid.v1() + '.png';
+            // Upload to firebase cloud
+            storage.ref('Users/$newName').putFile(imageFile).then((value) {
+              //Perform user registration to firebase
+              register(newName);
+            }).catchError((error) {
+              closeProgressDialog();
+            });
           }
         },
       ),
     );
   }
 
-  Future<void> register() async {
+  void showAlertDialog(String content) {
+    showDialog(
+        context: context,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            title: Text('Warning'),
+            content: Text(content),
+            actions: [
+              RaisedButton(
+                child: Text('OK'),
+                color: Colors.blueGrey,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        });
+  }
+
+  Future<void> register(String photoFile) async {
     FirebaseAuth auth = FirebaseAuth.instance;
     await auth
         .createUserWithEmailAndPassword(email: email, password: password)
         .then((response) {
-      Future.delayed(
-        Duration(milliseconds: 500),
-      ).then((v) {
-        pr.hide();
-        showSuccessDialog('Done',
-            'User registeration completed, try again when login screen');
+      //Get current user
+      var currentUser = auth.currentUser;
+      //FirebaseFireStore reference
+      CollectionReference userReference = firestore.collection('Users');
+      //Prepare new Data for new user
+      UserModel userModel = new UserModel(currentUser.email, photoFile);
+
+      //Add Data to firestore
+      userReference.add(userModel.toMap()).then((value) {
+        closeProgressDialog();
+      }).catchError((error) {
+        closeProgressDialog();
       });
     }).catchError((response) {
-      print('error');
+      closeProgressDialog();
+    });
+  }
+
+  Future<void> closeProgressDialog() async {
+    setState(() {
       Future.delayed(
-        Duration(milliseconds: 500),
+        Duration(milliseconds: 1000),
       ).then((v) {
-        pr.hide();
+        pr.hide().whenComplete(() {
+          showSuccessDialog('Done',
+              'User registeration completed, try again when login screen');
+        });
       });
     });
   }
@@ -252,8 +320,51 @@ class _RegisterState extends State<Register> {
     await Firebase.initializeApp();
   }
 
+  // Method to working with Image source
+  Future<void> chooseImageSource(ImageSource img) async {
+    try {
+      var imageData =
+          await ImagePicker().getImage(source: img, imageQuality: 50);
+      setState(() {
+        imageFile = File(imageData.path);
+      });
+    } catch (ex) {
+      setState(() {
+        imageFile = null;
+      });
+      print(ex);
+    }
+  }
+
+//Method to show errordialog
+  void exceptionDialog(String title, String content) {
+    showDialog(
+        context: context,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            title: Column(
+              children: [
+                Text('Error!!!'),
+                SizedBox(
+                  height: 10,
+                ),
+                Container(
+                  height: 2,
+                  color: Colors.blueGrey,
+                )
+              ],
+            ),
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
+    //Firestorage initailize
+    storage = firebase_storage.FirebaseStorage.instance;
+    //Firestore initailize
+    firestore = FirebaseFirestore.instance;
+
     //Define Progress dialog
     pr = new ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false, showLogs: false);
