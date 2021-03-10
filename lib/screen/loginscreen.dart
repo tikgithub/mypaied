@@ -114,6 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Navigator.of(context)
                     .pushAndRemoveUntil(route, (route) => false);
               }).catchError((error) {
+                print(error);
                 hideProgress();
                 showLoginExceptionDialog(error.code, error.message);
               });

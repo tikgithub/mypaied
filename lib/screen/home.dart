@@ -1,8 +1,10 @@
+import 'dart:io';
+import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:mypaied/model/user.dart';
+import 'package:mypaied/model/config.dart';
 import 'package:mypaied/screen/loginscreen.dart';
 
 class Home extends StatefulWidget {
@@ -17,6 +19,7 @@ class _HomeState extends State<Home> {
   FirebaseFirestore db;
   //FireStore Collection
   CollectionReference userCollection;
+  String hostname = new Config().getHostName();
 
   //Method init flutter
   @override
@@ -27,13 +30,8 @@ class _HomeState extends State<Home> {
       auth = FirebaseAuth.instance;
       db = FirebaseFirestore.instance;
 
-      db
-          .collection("Users")
-          .where('email', isEqualTo: auth.currentUser)
-          .get()
-          .then((query) {
-        Map<String, dynamic> maps = query.docs[0].data();
-        print(maps['photo']);
+      auth.currentUser.getIdToken(true).then((value) {
+        print(value.toString());
       });
 
       setState(() {
@@ -56,10 +54,15 @@ class _HomeState extends State<Home> {
     );
   }
 
+  void callHttp() async {
+    print('HTTP CALL HERE *************************');
+    var response = await http.get("$hostname/test");
+    print(response.body);
+  }
+
   @override
   Widget build(BuildContext context) {
-    //Firebase run
-
+    callHttp();
     return Scaffold(
       appBar: AppBar(
         actions: [
