@@ -8,12 +8,10 @@ import 'package:mypaied/model/config.dart';
 import 'package:mypaied/model/user.dart';
 import 'package:mypaied/screen/loginscreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:mypaied/service/apicaller.dart';
 import 'package:progress_dialog/progress_dialog.dart';
-import 'package:uuid/uuid.dart';
 import 'loginscreen.dart';
-import 'package:http/http.dart' as http;
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:dio/dio.dart';
 
 class Register extends StatefulWidget {
   @override
@@ -228,44 +226,31 @@ class _RegisterState extends State<Register> {
         child: Text('Register'),
         onPressed: () {
           print('register click');
-          Map<String, String> data = Map();
-          data['email'] = 'test@gmail.com';
-          data['photo'] = 'photo.png';
-          APICaller().post('user/register', data);
 
           // if (imageFile == null) {
           //   showAlertDialog('Please check your profile photo');
           //   return;
           // }
+          sendRegistData('', 'photo');
+
+          print('after send');
           // if (formKey.currentState.validate()) {
           //   formKey.currentState.save();
-          //   registerAPICall('me@gamil.com', 'test.png');
+
           // }
         },
       ),
     );
   }
 
-  //Http call to register at serverside
-  void registerAPICall(String email, String photo) async {
-    var rootURL = Config().getHostName();
-    Map<String, String> data = Map();
-    data['email'] = email;
-    data['photo'] = photo;
-
-    await http
-        .post(rootURL + "user/register",
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-            },
-            body: jsonEncode(data))
-        .then((value) {
-      print(value.body);
-      closeProgressDialog();
-    }).catchError((value) {
-      print(value.message);
-      closeProgressDialog();
+  void sendRegistData(String email, String photo) async {
+    var dio = Dio();
+    Response response = await dio
+        .post('https://mypaidserver.herokuapp.com/api/user/register', data: {
+      'email': 'hello@gmail.com',
+      'photo': 'hello.png',
     });
+    print(response.data.toString());
   }
 
   void showAlertDialog(String content) {
@@ -416,7 +401,6 @@ class _RegisterState extends State<Register> {
     );
   }
 }
-
 
 // pr.show();
 //             //Define new UUID
