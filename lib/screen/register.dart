@@ -1,14 +1,18 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mypaied/model/config.dart';
 import 'package:mypaied/model/user.dart';
 import 'package:mypaied/screen/loginscreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mypaied/service/apicaller.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:uuid/uuid.dart';
 import 'loginscreen.dart';
+import 'package:http/http.dart' as http;
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class Register extends StatefulWidget {
@@ -223,28 +227,45 @@ class _RegisterState extends State<Register> {
         color: Colors.blueGrey,
         child: Text('Register'),
         onPressed: () {
-          if (imageFile == null) {
-            showAlertDialog('Please check your profile photo');
-            return;
-          }
-          if (formKey.currentState.validate()) {
-            formKey.currentState.save();
-            pr.show();
-            //Define new UUID
-            var uuid = Uuid();
-            // Create new filename with random string
-            String newName = uuid.v1() + '.png';
-            // Upload to firebase cloud
-            storage.ref('Users/$newName').putFile(imageFile).then((value) {
-              //Perform user registration to firebase
-              register(newName);
-            }).catchError((error) {
-              closeProgressDialog();
-            });
-          }
+          print('register click');
+          Map<String, String> data = Map();
+          data['email'] = 'test@gmail.com';
+          data['photo'] = 'photo.png';
+          APICaller().post('user/register', data);
+
+          // if (imageFile == null) {
+          //   showAlertDialog('Please check your profile photo');
+          //   return;
+          // }
+          // if (formKey.currentState.validate()) {
+          //   formKey.currentState.save();
+          //   registerAPICall('me@gamil.com', 'test.png');
+          // }
         },
       ),
     );
+  }
+
+  //Http call to register at serverside
+  void registerAPICall(String email, String photo) async {
+    var rootURL = Config().getHostName();
+    Map<String, String> data = Map();
+    data['email'] = email;
+    data['photo'] = photo;
+
+    await http
+        .post(rootURL + "user/register",
+            headers: <String, String>{
+              'Content-Type': 'application/json; charset=UTF-8',
+            },
+            body: jsonEncode(data))
+        .then((value) {
+      print(value.body);
+      closeProgressDialog();
+    }).catchError((value) {
+      print(value.message);
+      closeProgressDialog();
+    });
   }
 
   void showAlertDialog(String content) {
@@ -273,11 +294,11 @@ class _RegisterState extends State<Register> {
         .createUserWithEmailAndPassword(email: email, password: password)
         .then((response) {
       //Get current user
-      var currentUser = auth.currentUser;
+      // var currentUser = auth.currentUser;
       //FirebaseFireStore reference
       CollectionReference userReference = firestore.collection('Users');
       //Prepare new Data for new user
-      UserModel userModel = new UserModel(currentUser.email, photoFile);
+      UserModel userModel = new UserModel(email, photoFile);
 
       //Add Data to firestore
       userReference.add(userModel.toMap()).then((value) {
@@ -395,3 +416,20 @@ class _RegisterState extends State<Register> {
     );
   }
 }
+
+
+// pr.show();
+//             //Define new UUID
+//             var uuid = Uuid();
+//             // Create new filename with random string
+//             String newName = uuid.v1() + '.png';
+//             // Upload to firebase cloud
+//             registerAPICall(email, newName);
+//             closeProgressDialog();
+//             // storage.ref('Users/$newName').putFile(imageFile).then((value) {
+//             //   //Perform user registration to firebase
+//             //   // register(newName);
+
+//             // }).catchError((error) {
+//             //   closeProgressDialog();
+//             // });
