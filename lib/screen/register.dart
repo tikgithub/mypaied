@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -9,6 +8,7 @@ import 'package:mypaied/model/user.dart';
 import 'package:mypaied/screen/loginscreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+import 'package:uuid/uuid.dart';
 import 'loginscreen.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:dio/dio.dart';
@@ -224,31 +224,52 @@ class _RegisterState extends State<Register> {
         padding: EdgeInsets.only(top: 20, bottom: 20),
         color: Colors.blueGrey,
         child: Text('Register'),
-        onPressed: () {
+        onPressed: () async {
           print('register click');
 
-          // if (imageFile == null) {
-          //   showAlertDialog('Please check your profile photo');
-          //   return;
-          // }
-          sendRegistData('', 'photo');
+          if (imageFile == null) {
+            showAlertDialog('Please check your profile photo');
+            return;
+          }
 
           print('after send');
-          // if (formKey.currentState.validate()) {
-          //   formKey.currentState.save();
+          if (formKey.currentState.validate()) {
+            formKey.currentState.save();
+            //show Progress dialog
+            pr.show();
+            FirebaseAuth.instance
+                .createUserWithEmailAndPassword(
+                    email: email, password: password)
+                .then((value) async {
+              //Upload Image to Firebase Store
+              //Genertate new Filename
+              String newFileName = Uuid().v1();
+              firebase_storage.Reference ref = firebase_storage
+                  .FirebaseStorage.instance
+                  .ref()
+                  .child('Users/$newFileName.png');
 
-          // }
+              ref.putFile(imageFile).then((value) async {
+                //Send Data Email and Photo filename to API Heroku
+                await sendRegistData(email, '$newFileName.png');
+                closeProgressDialog();
+              });
+            }).catchError((error) {
+              print(error.message);
+              closeProgressDialog();
+            });
+          }
         },
       ),
     );
   }
 
-  void sendRegistData(String email, String photo) async {
+  Future sendRegistData(String email, String photo) async {
     var dio = Dio();
-    Response response = await dio
-        .post('https://mypaidserver.herokuapp.com/api/user/register', data: {
-      'email': 'hello@gmail.com',
-      'photo': 'hello.png',
+    Response response =
+        await dio.post(new Config().getHostName() + 'user/register', data: {
+      'email': email,
+      'photo': photo,
     });
     print(response.data.toString());
   }

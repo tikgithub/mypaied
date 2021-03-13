@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:mypaied/screen/register.dart';
+import 'package:mypaied/widget/progressdialog.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 
 import 'home.dart';
@@ -13,6 +14,9 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   //Method
+
+  //Define ProgressDialog
+  ProcessingDialog processingDialog;
 
   //Username
   final TextEditingController txtUsername = TextEditingController();
@@ -102,20 +106,25 @@ class _LoginScreenState extends State<LoginScreen> {
           onPressed: () {
             if (formKey.currentState.validate()) {
               formKey.currentState.save();
+              processingDialog.show();
               FirebaseAuth auth = FirebaseAuth.instance;
               auth
                   .signInWithEmailAndPassword(
                       email: txtUsername.text.trim(),
                       password: txtPassword.text.trim())
-                  .then((value) {
-                hideProgress();
+                  .then((value) async {
+                //Close ProgressIndicator
+                await processingDialog.close();
+                //Goto Home Screen
                 MaterialPageRoute route =
                     MaterialPageRoute(builder: (value) => Home());
                 Navigator.of(context)
                     .pushAndRemoveUntil(route, (route) => false);
               }).catchError((error) {
                 print(error);
-                hideProgress();
+
+                processingDialog.close();
+                //Show error exception dialog
                 showLoginExceptionDialog(error.code, error.message);
               });
             }
@@ -247,18 +256,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    //Define Progress dialog
-    progressDialog = new ProgressDialog(context,
-        type: ProgressDialogType.Normal, isDismissible: false, showLogs: false);
-    progressDialog.style(
-      message: 'Please wait while your request is processing',
-      progressWidget: Container(
-        padding: EdgeInsets.all(10),
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-        ),
-      ),
-    );
+    //create new Instance
+    processingDialog = new ProcessingDialog(
+        context, 'Please Wait While User information is Authorizing');
 
     return Scaffold(
       resizeToAvoidBottomInset: false,

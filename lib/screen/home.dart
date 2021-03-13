@@ -1,11 +1,16 @@
-import 'dart:io';
-import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:mypaied/model/config.dart';
 import 'package:mypaied/screen/loginscreen.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:mypaied/widget/loadingscreen.dart';
+import 'package:mypaied/widget/progressdialog.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -13,12 +18,20 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  String useremail;
+  String useremail = 'Loading...';
   FirebaseAuth auth;
   //FireStore define
   FirebaseFirestore db;
   //FireStore Collection
   CollectionReference userCollection;
+  //Filename of image storer
+  String imageFileName;
+
+  ProcessingDialog processingDialog;
+
+  //Profile Imagenetwork
+  var urlProfile;
+
   String hostname = new Config().getHostName();
 
   //Method init flutter
@@ -26,18 +39,34 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
 
-    Firebase.initializeApp().then((value) {
+    Firebase.initializeApp().then((value) async {
       auth = FirebaseAuth.instance;
       db = FirebaseFirestore.instance;
-
       auth.currentUser.getIdToken(true).then((value) {
         print(value.toString());
       });
 
+      imageFileName = await getImage();
+
+      firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+          .ref()
+          .child('Users')
+          .child(imageFileName);
+      urlProfile = await ref.getDownloadURL();
+      print(urlProfile);
       setState(() {
         useremail = auth.currentUser.email;
       });
     });
+  }
+
+  Future<String> getImage() async {
+    var client = new Dio();
+    client.options.headers['authorization'] =
+        'Bearer ' + await FirebaseAuth.instance.currentUser.getIdToken(true);
+    var response = await client.get(Config().getHostName() + 'user/getByEmail');
+    Map<String, dynamic> user = jsonDecode(response.toString());
+    return user['photo'].toString();
   }
 
   //Method define
@@ -54,25 +83,87 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void callHttp() async {
-    print('HTTP CALL HERE *************************');
-    var response = await http.get("$hostname/test");
-    print(response.body);
+  Future signOut() async {
+    await FirebaseAuth.instance.signOut();
+    MaterialPageRoute route =
+        MaterialPageRoute(builder: (value) => LoginScreen());
+    Navigator.of(context).pushAndRemoveUntil(route, (value) => false);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    callHttp();
+  Widget showPhoto() {
+    return Container(
+      child: Column(
+        children: [
+          urlProfile != null
+              ? resizePhoto(
+                  Image.network(urlProfile),
+                )
+              : Container()
+        ],
+      ),
+    );
+  }
+
+  Widget resizePhoto(Widget img) {
+    return Container(
+      height: 100,
+      width: 100,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.5),
+            spreadRadius: 1,
+            blurRadius: 7,
+            offset: Offset(2, 3),
+          ),
+        ],
+        image: DecorationImage(
+          fit: BoxFit.cover,
+          image: NetworkImage(urlProfile),
+        ),
+      ),
+    );
+  }
+
+  Widget fullBody() {
     return Scaffold(
+      drawer: Drawer(
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            Container(
+                height: 200,
+                child: DrawerHeader(
+                  child: showPhoto(),
+                  decoration: BoxDecoration(
+                    color: Colors.blueGrey,
+                  ),
+                )),
+            ListTile(
+              title: Text('Item 1'),
+              onTap: () {
+                // Update the state of the app.
+                // ...
+              },
+            ),
+            ListTile(
+              title: Text('Item 2'),
+              onTap: () {
+                // Update the state of the app.
+                // ...
+              },
+            ),
+          ],
+        ),
+      ),
       appBar: AppBar(
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
-              FirebaseAuth.instance.signOut();
-              MaterialPageRoute route =
-                  MaterialPageRoute(builder: (value) => LoginScreen());
-              Navigator.of(context).pushAndRemoveUntil(route, (value) => false);
+              signOut();
             },
           )
         ],
@@ -80,7 +171,14 @@ class _HomeState extends State<Home> {
           child: Text('Home Page'),
         ),
       ),
-      body: showContent(),
+      body: LoaderOverlay(
+        child: Container(),
+      ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return urlProfile == null ? LoadingScreen() : fullBody();
   }
 }
