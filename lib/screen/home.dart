@@ -98,7 +98,17 @@ class _HomeState extends State<Home> {
               ? resizePhoto(
                   Image.network(urlProfile),
                 )
-              : Container()
+              : Container(),
+          Container(
+            padding: EdgeInsets.all(10),
+          ),
+          Text(
+            'Login By: $useremail',
+            style: TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.bold,
+            ),
+          )
         ],
       ),
     );
@@ -134,13 +144,14 @@ class _HomeState extends State<Home> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             Container(
-                height: 200,
-                child: DrawerHeader(
-                  child: showPhoto(),
-                  decoration: BoxDecoration(
-                    color: Colors.blueGrey,
-                  ),
-                )),
+              height: 250,
+              child: DrawerHeader(
+                child: showPhoto(),
+                decoration: BoxDecoration(
+                  color: Colors.blueGrey,
+                ),
+              ),
+            ),
             ListTile(
               title: Text('Item 1'),
               onTap: () {
