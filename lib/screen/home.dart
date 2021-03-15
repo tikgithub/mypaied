@@ -9,6 +9,7 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:mypaied/model/config.dart';
 import 'package:mypaied/screen/loginscreen.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:mypaied/screen/menu.dart';
 import 'package:mypaied/widget/loadingscreen.dart';
 import 'package:mypaied/widget/progressdialog.dart';
 
@@ -26,6 +27,8 @@ class _HomeState extends State<Home> {
   CollectionReference userCollection;
   //Filename of image storer
   String imageFileName;
+
+  Widget screenShow;
 
   ProcessingDialog processingDialog;
 
@@ -144,7 +147,7 @@ class _HomeState extends State<Home> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             Container(
-              height: 250,
+              height: 200,
               child: DrawerHeader(
                 child: showPhoto(),
                 decoration: BoxDecoration(
@@ -182,14 +185,13 @@ class _HomeState extends State<Home> {
           child: Text('Home Page'),
         ),
       ),
-      body: LoaderOverlay(
-        child: Container(),
-      ),
+      body: Menu(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return urlProfile == null ? LoadingScreen() : fullBody();
+    screenShow = fullBody();
+    return urlProfile == null ? LoadingScreen() : screenShow;
   }
 }
