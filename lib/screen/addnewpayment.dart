@@ -8,6 +8,7 @@ import 'package:date_format/date_format.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mypaied/model/config.dart';
+import 'package:mypaied/widget/progressdialog.dart';
 import 'package:pattern_formatter/pattern_formatter.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebaseStorage;
 import 'package:uuid/uuid.dart';
@@ -34,6 +35,8 @@ class _AddPaymentState extends State<AddPayment> {
 
   //Image source control
   ImageSource imageSource;
+  //Processing dialog
+  ProcessingDialog processingDialog;
 
   Future<void> _selectDate(BuildContext ctx) async {
     final DateTime pickDate = await showDatePicker(
@@ -171,6 +174,7 @@ class _AddPaymentState extends State<AddPayment> {
                           onPressed: () async {
                             if (formKey.currentState.validate()) {
                               formKey.currentState.save();
+                              processingDialog.show();
                               //Upload image to firebase server
                               await Firebase.initializeApp();
                               print('after');
@@ -208,8 +212,12 @@ class _AddPaymentState extends State<AddPayment> {
                                         .replaceAll(',', ''),
                                     'email':
                                         FirebaseAuth.instance.currentUser.email,
-                                  });
+                                  }).catchError((error) {
+                                processingDialog.close();
+                              });
                               print(res);
+                              processingDialog.close();
+                              Navigator.of(context).pop();
                             }
                           },
                           child: Text('Save'),
@@ -309,6 +317,7 @@ class _AddPaymentState extends State<AddPayment> {
 
   @override
   Widget build(BuildContext context) {
+    processingDialog = new ProcessingDialog(context, 'Please wait');
     return Scaffold(
       appBar: AppBar(
         title: Text('Add New Payment'),
