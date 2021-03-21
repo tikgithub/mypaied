@@ -1,36 +1,73 @@
+import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mypaied/model/config.dart';
 import 'package:mypaied/screen/addnewpayment.dart';
 
+import 'history.dart';
+
 class Menu extends StatelessWidget {
+  //For store data from list
+  var listItem;
+
+  //Function overide
+  Function updateScreen;
+
+  Menu(Function updateScreen);
+
+  //Screnn Handle Variable
+  Widget screenWidget;
+
+  handleScreen(Widget widget) {
+    screenWidget = widget;
+  }
+
   Widget menuBlock(String imageFilePath, String label) {
     return Container(
-      decoration: BoxDecoration(),
-      margin: EdgeInsets.fromLTRB(0, 15, 0, 0),
+      margin: EdgeInsets.fromLTRB(5, 0, 5, 10),
+      decoration: BoxDecoration(
+          color: Colors.white70,
+          border: Border(
+              bottom: BorderSide(
+            color: Colors.black,
+            width: 1,
+          ))),
       child: TextButton(
-        onPressed: () {},
-        child: Column(
+        onPressed: () {
+          handleScreen(new Hisotry());
+        },
+        child: Row(
           children: [
             Image.asset(
               imageFilePath,
-              width: 100,
-              height: 100,
+              width: 50,
+              height: 50,
             ),
-            Text(label)
+            SizedBox(
+              width: 10,
+            ),
+            Text(
+              label,
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black),
+            )
           ],
         ),
       ),
     );
   }
 
-  Widget arrangeMenu() {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [menuBlock('images/avatar.png', '')],
-        ),
-      ],
-    );
+  void getItem() async {
+    //Refresh item variable
+    listItem = null;
+
+    var client = new Dio();
+    client.options.headers['authorization'] =
+        'Bearer ' + await FirebaseAuth.instance.currentUser.getIdToken(true);
+    Response res = await client.get(Config().getHostName() + 'item/list');
+    listItem = res;
   }
 
   @override
@@ -38,7 +75,11 @@ class Menu extends StatelessWidget {
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
-          children: [arrangeMenu()],
+          children: [
+            menuBlock('images/statement.png', 'ປະຫວັດການຈ່າຍເງິນ'),
+            menuBlock('images/money-bag.png', 'ສະແດງຍອດລວມລາຍຈ່າຍ'),
+            menuBlock('images/accountant.png', 'ສ້າງລາຍຈ່າຍສະເພາະ'),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(

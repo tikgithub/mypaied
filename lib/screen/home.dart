@@ -37,6 +37,9 @@ class _HomeState extends State<Home> {
 
   String hostname = new Config().getHostName();
 
+  //Screen handle variable
+  Widget screenHandle;
+
   //Method init flutter
   @override
   void initState() {
@@ -60,6 +63,12 @@ class _HomeState extends State<Home> {
       setState(() {
         useremail = auth.currentUser.email;
       });
+    });
+  }
+
+  updateScreen(Widget widget) {
+    setState(() {
+      screenHandle = widget;
     });
   }
 
@@ -185,8 +194,14 @@ class _HomeState extends State<Home> {
           child: Text('Home Page'),
         ),
       ),
-      body: Menu(),
+      body: Menu(updateScreen(widget)),
     );
+  }
+
+  handleScreen(Widget widget) {
+    setState(() {
+      screenHandle = widget;
+    });
   }
 
   @override
