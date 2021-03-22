@@ -194,14 +194,8 @@ class _HomeState extends State<Home> {
           child: Text('Home Page'),
         ),
       ),
-      body: Menu(updateScreen(widget)),
+      body: Menu(),
     );
-  }
-
-  handleScreen(Widget widget) {
-    setState(() {
-      screenHandle = widget;
-    });
   }
 
   @override
