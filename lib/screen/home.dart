@@ -5,7 +5,6 @@ import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:loader_overlay/loader_overlay.dart';
 import 'package:mypaied/model/config.dart';
 import 'package:mypaied/screen/loginscreen.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -39,6 +38,7 @@ class _HomeState extends State<Home> {
 
   //Screen handle variable
   Widget screenHandle;
+  Widget subScreen = Menu();
 
   //Method init flutter
   @override
@@ -156,7 +156,7 @@ class _HomeState extends State<Home> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             Container(
-              height: 200,
+              height: 300,
               child: DrawerHeader(
                 child: showPhoto(),
                 decoration: BoxDecoration(
@@ -200,7 +200,6 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    screenShow = fullBody();
-    return urlProfile == null ? LoadingScreen() : screenShow;
+    return urlProfile == null ? LoadingScreen() : fullBody();
   }
 }

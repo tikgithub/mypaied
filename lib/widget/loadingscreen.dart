@@ -4,14 +4,17 @@ class LoadingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Text(
-          'Please wait...',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset('images/loading.gif'),
+            ],
           ),
-        ),
+          Text('Please Wait...'),
+        ],
       ),
     );
   }

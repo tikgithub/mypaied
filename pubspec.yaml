@@ -33,6 +33,7 @@ dependencies:
   dio: ^3.0.10
   loader_overlay: ^2.0.0
   date_format: ^2.0.2
+  intl: ^0.16.0
   pattern_formatter: ^1.0.2
 
   # The following adds the Cupertino Icons font to your application.

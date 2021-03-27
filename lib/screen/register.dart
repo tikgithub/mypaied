@@ -79,6 +79,7 @@ class _RegisterState extends State<Register> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // ignore: deprecated_member_use
                   RaisedButton(
                     onPressed: () {
                       MaterialPageRoute pageRoute =

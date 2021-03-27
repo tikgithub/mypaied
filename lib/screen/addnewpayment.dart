@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -207,7 +206,7 @@ class _AddPaymentState extends State<AddPayment> {
                                       [yyyy, '-', mm, '-', dd],
                                     ),
                                     'detail': txtDetailController.text,
-                                    'photo': newFileName + '.png',
+                                    'photo': await ref.getDownloadURL(),
                                     'amount': txtAmountController.text
                                         .replaceAll(',', ''),
                                     'email':
@@ -292,7 +291,7 @@ class _AddPaymentState extends State<AddPayment> {
                     if (imageSource != null) {
                       //Show image in thumnail'
                       var imageData = await ImagePicker()
-                          .getImage(source: imageSource, imageQuality: 50);
+                          .getImage(source: imageSource, imageQuality: 10);
                       setState(() {
                         imageFile = File(imageData.path);
                       });
