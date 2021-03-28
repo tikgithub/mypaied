@@ -290,8 +290,11 @@ class _AddPaymentState extends State<AddPayment> {
                     //check image was selected ?
                     if (imageSource != null) {
                       //Show image in thumnail'
-                      var imageData = await ImagePicker()
-                          .getImage(source: imageSource, imageQuality: 10);
+                      var imageData = await ImagePicker().getImage(
+                          source: imageSource,
+                          imageQuality: 10,
+                          maxHeight: 800,
+                          maxWidth: 800);
                       setState(() {
                         imageFile = File(imageData.path);
                       });
