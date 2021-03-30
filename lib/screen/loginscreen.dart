@@ -248,10 +248,10 @@ class _LoginScreenState extends State<LoginScreen> {
     Firebase.initializeApp().then((value) {
       auth = FirebaseAuth.instance;
       var user = auth.currentUser;
-      if (user != null) {
-        MaterialPageRoute route = MaterialPageRoute(builder: (value) => Home());
-        Navigator.of(context).pushAndRemoveUntil(route, (value) => false);
-      }
+      // if (user != null) {
+      //   MaterialPageRoute route = MaterialPageRoute(builder: (value) => Home());
+      //   Navigator.of(context).pushAndRemoveUntil(route, (value) => false);
+      // }
     });
   }
 
