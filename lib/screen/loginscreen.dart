@@ -257,6 +257,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    setState(() {
+      txtPassword.text = "111111";
+      txtUsername.text = "tik@gmail.com";
+    });
     //create new Instance
     processingDialog = new ProcessingDialog(
         context, 'Please Wait While User information is Authorizing');

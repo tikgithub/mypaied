@@ -268,7 +268,7 @@ class _RegisterState extends State<Register> {
   Future sendRegistData(String email, String photo) async {
     var dio = Dio();
     Response response =
-        await dio.post(new Config().getHostName() + 'user/register', data: {
+        await dio.post(new Config().getHostName() + 'register', data: {
       'email': email,
       'photo': photo,
     });

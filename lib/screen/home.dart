@@ -52,8 +52,12 @@ class _HomeState extends State<Home> {
         print(value.toString());
       });
 
-      imageFileName = await getImage();
-
+      imageFileName = await getImage().catchError((err) {
+        MaterialPageRoute loginPage =
+            new MaterialPageRoute(builder: (BuildContext ctx) => LoginScreen());
+        Navigator.of(context).pushAndRemoveUntil(loginPage, (route) => false);
+      });
+      print('Image name $imageFileName');
       firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
           .ref()
           .child('Users')
@@ -76,9 +80,11 @@ class _HomeState extends State<Home> {
     var client = new Dio();
     client.options.headers['authorization'] =
         'Bearer ' + await FirebaseAuth.instance.currentUser.getIdToken(true);
-    var response = await client.get(Config().getHostName() + 'user/getByEmail');
-    Map<String, dynamic> user = jsonDecode(response.toString());
-    return user['photo'].toString();
+    Response<String> response =
+        await client.get(Config().getHostName() + 'user/getUserbyEmail');
+    // Map databody = response.data;
+    Map data = jsonDecode(response.data);
+    return data['photo'].toString();
   }
 
   //Method define
