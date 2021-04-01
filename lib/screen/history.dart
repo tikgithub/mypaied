@@ -1,12 +1,10 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'package:date_format/date_format.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mypaied/model/config.dart';
-import 'package:mypaied/widget/loadingscreen.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class Hisotry extends StatefulWidget {
@@ -17,27 +15,32 @@ class Hisotry extends StatefulWidget {
 class _HisotryState extends State<Hisotry> {
   List<Map<String, dynamic>> itemsAll = [];
   var format = NumberFormat('#,##,000', 'lo_LA');
+  bool isloading = false;
+  ScrollController _sc = new ScrollController();
+  static int page = 0;
 
   @override
   void initState() {
     super.initState();
-    asyncFunction();
+    //load data
+    _getData(page);
+    _sc.addListener(() {
+      if (_sc.position.pixels == _sc.position.maxScrollExtent) {
+        //loadata here
+      }
+    });
   }
 
-  Future<void> asyncFunction() async {
-    itemsAll = await getItems();
-    setState(() {});
-  }
-
-  Future<List<Map<String, dynamic>>> getItems() async {
+  void _getData(int index) async {
     var client = new Dio();
     client.options.headers['Authorization'] =
         'Bearer ' + await FirebaseAuth.instance.currentUser.getIdToken(true);
-    Response response = await client.get(Config().getHostName() + 'item/list',
-        options: Options(
-            contentType: Headers.jsonContentType,
-            responseType: ResponseType.plain));
-    return List<Map<String, dynamic>>.from(json.decode(response.data));
+    Response response = await client.get(
+      Config().getHostName() + 'payment/0/3',
+    );
+    List dataList = new List();
+    print(response.data.length);
+    //return List<Map<String, dynamic>>.from(json.decode(response.data));
   }
 
   Widget showCard(index) {
@@ -50,10 +53,10 @@ class _HisotryState extends State<Hisotry> {
           borderRadius: BorderRadius.circular(5),
         ),
         child: showListItem(
-          itemsAll[index]['title'],
+          itemsAll[index]['item'],
           itemsAll[index]['amount'].toString(),
           itemsAll[index]['photo'],
-          DateTime.parse(itemsAll[index]['payDate']),
+          DateTime.parse(itemsAll[index]['pay_date']),
         ),
       ),
     );
@@ -168,19 +171,32 @@ class _HisotryState extends State<Hisotry> {
     );
   }
 
+  Widget _buildProgressIndication() {
+    return new Padding(
+      padding: EdgeInsets.all(8),
+      child: Center(
+        child: Opacity(
+          opacity: isloading ? 1 : 0,
+          child: CircularProgressIndicator(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildList() {
+    return ListView.builder(
+        itemCount: itemsAll.length,
+        itemBuilder: (context, index) {
+          return showCard(index);
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('ປະຫວັດລາຍຈ່າຍ'),
-      ),
-      body: itemsAll.isEmpty
-          ? LoadingScreen()
-          : ListView.builder(
-              itemCount: itemsAll.length,
-              itemBuilder: (context, index) {
-                return showCard(index);
-              }),
-    );
+        appBar: AppBar(
+          title: Text('ປະຫວັດລາຍຈ່າຍ'),
+        ),
+        body: _buildList());
   }
 }
