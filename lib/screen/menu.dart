@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mypaied/screen/addnewpayment.dart';
 import 'package:mypaied/screen/history.dart';
+import 'package:mypaied/screen/simplelazyloading.dart';
 
 // ignore: must_be_immutable
 class Menu extends StatefulWidget {
@@ -62,7 +63,8 @@ class _MenuState extends State<Menu> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            menuBlock('images/statement.png', 'ປະຫວັດລາຍຈ່າຍ', Hisotry()),
+            menuBlock(
+                'images/statement.png', 'ປະຫວັດລາຍຈ່າຍ', SimpleLazyloading()),
             menuBlock('images/money-bag.png', 'ສະແດງຍອດລວມລາຍຈ່າຍ', Hisotry()),
             menuBlock('images/accountant.png', 'ສ້າງລາຍຈ່າຍສະເພາະ', Hisotry()),
           ],
