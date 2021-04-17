@@ -176,21 +176,28 @@ class _AddPaymentState extends State<AddPayment> {
                               processingDialog.show();
                               //Upload image to firebase server
                               await Firebase.initializeApp();
-                              print('after');
                               //check photo was select or note
+                              String imageFileName= '';
+                              firebaseStorage.Reference ref;
                               if (imageFile == null) {
                                 print('User not select image');
-                                imageFile = Image.asset('images/avatar.png');
+                                imageFileName = '';
+                              }else{
+
+                                //Generate filename of image
+                                String newFileName = Uuid().v1();
+                                ref = firebaseStorage
+                                    .FirebaseStorage.instance
+                                    .ref()
+                                    .child('Items/$newFileName.png');
+                                await ref.putFile(imageFile);
+
+                                 imageFileName =  await ref.getDownloadURL();
+                                //Upload image file done
                               }
-                              //Generate filename of image
-                              String newFileName = Uuid().v1();
-                              firebaseStorage.Reference ref = firebaseStorage
-                                  .FirebaseStorage.instance
-                                  .ref()
-                                  .child('Items/$newFileName.png');
-                              await ref.putFile(imageFile);
-                              //Upload image file done
+
                               //Send data to API
+
 
                               var client = new Dio();
                               client.options.headers['authorization'] =
@@ -198,15 +205,15 @@ class _AddPaymentState extends State<AddPayment> {
                                       await FirebaseAuth.instance.currentUser
                                           .getIdToken(true);
                               Response res = await client.post(
-                                  Config().getHostName() + 'item/',
+                                  Config().getHostName() + 'payment',
                                   data: {
-                                    'title': txtItemController.text,
-                                    'payDate': formatDate(
+                                    'item': txtItemController.text,
+                                    'pay_date': formatDate(
                                       current,
                                       [yyyy, '-', mm, '-', dd],
                                     ),
                                     'detail': txtDetailController.text,
-                                    'photo': await ref.getDownloadURL(),
+                                    'photo': imageFileName,
                                     'amount': txtAmountController.text
                                         .replaceAll(',', ''),
                                     'email':
@@ -214,7 +221,7 @@ class _AddPaymentState extends State<AddPayment> {
                                   }).catchError((error) {
                                 processingDialog.close();
                               });
-                              print(res);
+
                               processingDialog.close();
                               Navigator.of(context).pop();
                             }

@@ -196,12 +196,24 @@ class _HomeState extends State<Home> {
             },
           )
         ],
-        title: Center(
-          child: Text('Home Page'),
+        title: Row(
+          children: [
+            SizedBox(
+              width: 10,
+            ),
+            Text('ເມນູ', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+          ],
         ),
       ),
       body: Menu(),
     );
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    FirebaseAuth.instance.signOut();
   }
 
   @override

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mypaied/screen/addnewpayment.dart';
 import 'package:mypaied/screen/history.dart';
+import 'package:mypaied/screen/paymentpurpose.dart';
+import 'package:mypaied/screen/searchpayment.dart';
 import 'package:mypaied/screen/simplelazyloading.dart';
 
 // ignore: must_be_immutable
@@ -60,29 +62,41 @@ class _MenuState extends State<Menu> {
     }
 
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              menuBlock('images/statement.png', 'ປະຫວັດລາຍຈ່າຍ', Hisotry()),
+              menuBlock(
+                  'images/money-bag.png', 'ຄົ້ນຫາລາຍຈ່າຍ', SearchPayment()),
+              menuBlock(
+                  'images/accountant.png', 'ສ້າງລາຍຈ່າຍສະເພາະ', Hisotry()),
+            ],
+          ),
+        ),
+        floatingActionButton: Row(
           children: [
-            menuBlock(
-                'images/statement.png', 'ປະຫວັດລາຍຈ່າຍ', SimpleLazyloading()),
-            menuBlock('images/money-bag.png', 'ສະແດງຍອດລວມລາຍຈ່າຍ', Hisotry()),
-            menuBlock('images/accountant.png', 'ສ້າງລາຍຈ່າຍສະເພາະ', Hisotry()),
+            Spacer(
+              flex: 1,
+            ),
+            FloatingActionButton(
+              onPressed: () {
+                MaterialPageRoute router = new MaterialPageRoute(builder: (BuildContext ctx)=>PaymentPurpose());
+                Navigator.of(context).push(router);
+              },
+              child: Icon(Icons.payments),
+              heroTag: '01',
+            ),
+            SizedBox(width: 10,),
+            FloatingActionButton(
+              onPressed: () {
+                MaterialPageRoute router = new MaterialPageRoute(
+                    builder: (BuildContext ctx) => AddPayment());
+                Navigator.of(context).push(router);
+              },
+              child: Icon(Icons.add),
+              heroTag: '02',
+            ),
           ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(
-          Icons.add,
-          size: 40,
-        ),
-        onPressed: () {
-          MaterialPageRoute route = new MaterialPageRoute(
-            builder: (BuildContext ctx) => AddPayment(),
-          );
-          Navigator.of(context).push(route);
-        },
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-    );
+        ));
   }
 }
