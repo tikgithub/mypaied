@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:date_format/date_format.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:mypaied/model/config.dart';
 import 'package:mypaied/screen/editscreen.dart';
 import 'package:mypaied/widget/progressdialog.dart';
-
 import 'detailscreen.dart';
 
 class SearchPayment extends StatefulWidget {
@@ -308,9 +304,16 @@ class _SearchPaymentState extends State<SearchPayment> {
                                               child: TextButton(
                                                 onPressed: () {
                                                   Navigator.of(context).pop();
-                                                  print(myList[index]);
-                                                  MaterialPageRoute route = new MaterialPageRoute(builder: (BuildContext ctx)=>PaymentEditScreen(myList[index]));
-                                                  Navigator.of(context).push(route);
+                                                  MaterialPageRoute route =
+                                                      new MaterialPageRoute(
+                                                    builder: (BuildContext
+                                                            ctx) =>
+                                                        PaymentEditScreen(
+                                                            data:
+                                                                myList[index]),
+                                                  );
+                                                  Navigator.of(context)
+                                                      .push(route);
                                                 },
                                                 child: Row(
                                                   children: [
