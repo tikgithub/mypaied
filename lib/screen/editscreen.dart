@@ -254,36 +254,27 @@ class _PaymentEditScreenState extends State<PaymentEditScreen> {
                         onPressed: () async {
                           if (formKey.currentState.validate()) {
                             formKey.currentState.save();
-                            // await Firebase.initializeApp();
-                            // firebaseStorage.Reference ref;
-                            // String imageFilename = Uuid().v1();
-                            // //upload new image
-                            // ref = firebaseStorage.FirebaseStorage.instance
-                            //     .ref()
-                            //     .child('Items/$imageFilename.png');
-                            // await ref.putFile(imageFile);
-                            // //Delete old image
-                            // if (this.data['photo'] != '') {
-                            //   var name = firebaseStorage
-                            //       .FirebaseStorage.instance
-                            //       .refFromURL(this.data['photo']);
-                            //   ref = firebaseStorage.FirebaseStorage.instance
-                            //       .ref()
-                            //       .child('Items/$name');
-                            //   await ref.delete();
-                            // }
-                            // print(imageFilename);
                             await Firebase.initializeApp();
                             firebaseStorage.Reference ref;
+                            String imageFilename = Uuid().v1();
                             //upload new image
+                            ref = firebaseStorage.FirebaseStorage.instance
+                                .ref()
+                                .child('Items/$imageFilename.png');
+                            await ref.putFile(imageFile);
+                            //Delete old image
+                            if (this.data['photo'] != '') {
                               var name = firebaseStorage
                                   .FirebaseStorage.instance
-                                  .refFromURL('https://firebasestorage.googleapis.com/v0/b/mypaied.appspot.com/o/Items%2Fc9a7ce00-a2da-11eb-9359-67c1fa221d15.png?alt=media&token=d747c49d-358a-487b-89f4-579f30a6163d');
-                              print('Image name: ' + name.name);
+                                  .refFromURL(this.data['photo']);
                               ref = firebaseStorage.FirebaseStorage.instance
                                   .ref()
                                   .child('Items/${name.name}');
                               await ref.delete();
+                              //Update data by api
+                              
+                            }
+
                           }
                         },
                         child: Text('ບັນທຶກ'),
