@@ -1,13 +1,20 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:date_format/date_format.dart';
+import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:mypaied/model/function_util.dart';
 import 'package:pattern_formatter/numeric_formatter.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebaseStorage;
 import 'package:uuid/uuid.dart';
+
+import '../model/config.dart';
+import '../model/config.dart';
 
 class PaymentEditScreen extends StatefulWidget {
   var data;
@@ -39,7 +46,6 @@ class _PaymentEditScreenState extends State<PaymentEditScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     item.text = this.data['item'];
     detail.text = this.data['detail'];
@@ -255,26 +261,55 @@ class _PaymentEditScreenState extends State<PaymentEditScreen> {
                           if (formKey.currentState.validate()) {
                             formKey.currentState.save();
                             await Firebase.initializeApp();
-                            firebaseStorage.Reference ref;
-                            String imageFilename = Uuid().v1();
-                            //upload new image
-                            ref = firebaseStorage.FirebaseStorage.instance
-                                .ref()
-                                .child('Items/$imageFilename.png');
-                            await ref.putFile(imageFile);
-                            //Delete old image
-                            if (this.data['photo'] != '') {
-                              var name = firebaseStorage
-                                  .FirebaseStorage.instance
-                                  .refFromURL(this.data['photo']);
+
+                            String imageFilename = "";
+                            if (imageFile != null) {
+                              firebaseStorage.Reference ref;
+                              imageFilename = Uuid().v1() + ".png";
+                              //upload new image
                               ref = firebaseStorage.FirebaseStorage.instance
                                   .ref()
-                                  .child('Items/${name.name}');
-                              await ref.delete();
-                              //Update data by api
-                              
+                                  .child('Items/$imageFilename');
+                              await ref.putFile(imageFile);
+                              imageFilename = await ref.getDownloadURL();
+                            } else {
+                              imageFilename = "";
                             }
 
+                            // //Delete old image
+                            // if (this.data['photo'] != '') {
+                            //   var name = firebaseStorage
+                            //       .FirebaseStorage.instance
+                            //       .refFromURL(this.data['photo']);
+                            //   ref = firebaseStorage.FirebaseStorage.instance
+                            //       .ref()
+                            //       .child('Items/${name.name}');
+                            //   await ref.delete();
+                            //Update data by api- rf
+
+                            var client = new Dio();
+                            client.options.headers['authorization'] =
+                                "Bearer " +
+                                    await FirebaseAuth.instance.currentUser
+                                        .getIdToken(true);
+
+                            Map<String, dynamic> updateData = {
+                              'item': item.text,
+                              'pay_date': FunctionUtil()
+                                  .convertDDMMYYYToYYYYMMDD(pay_date.text),
+                              'detail': detail.text,
+                              'photo': imageFilename,
+                              'amount': amount.text.replaceAll(',', '')
+                            };
+
+                            await client
+                                .put(
+                                    Config().getHostName() +
+                                        'payment/${this.data['id']}',
+                                    data: updateData)
+                                .whenComplete(() {
+                              Navigator.pop(context);
+                            });
                           }
                         },
                         child: Text('ບັນທຶກ'),

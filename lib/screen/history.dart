@@ -151,9 +151,6 @@ class _HisotryState extends State<Hisotry> {
               } else {
                 return ListTile();
               }
-              // return isMore == true
-              //     ? CupertinoActivityIndicator()
-              //     : Container();
             } else {
               return Container(
                 decoration: BoxDecoration(
@@ -190,10 +187,12 @@ class _HisotryState extends State<Hisotry> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            myList[index]['item'],
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                          Expanded(
+                            child: Text(
+                              myList[index]['item'],
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
                           ),
                           Text(formatDate(
                             DateTime.parse(myList[index]['pay_date']),

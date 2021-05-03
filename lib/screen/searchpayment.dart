@@ -15,7 +15,7 @@ class SearchPayment extends StatefulWidget {
 
 class _SearchPaymentState extends State<SearchPayment> {
   var format = NumberFormat.decimalPattern("lo_LA");
-  DateTime fromDate = DateTime.now().subtract(Duration(days: 10));
+  DateTime fromDate = DateTime.now().subtract(Duration(days: 30));
   DateTime toDate = DateTime.now();
   TextEditingController fromDateController = new TextEditingController();
   TextEditingController toDateController = new TextEditingController();
@@ -302,7 +302,7 @@ class _SearchPaymentState extends State<SearchPayment> {
                                           children: [
                                             Container(
                                               child: TextButton(
-                                                onPressed: () {
+                                                onPressed: () async {
                                                   Navigator.of(context).pop();
                                                   MaterialPageRoute route =
                                                       new MaterialPageRoute(
@@ -312,8 +312,12 @@ class _SearchPaymentState extends State<SearchPayment> {
                                                             data:
                                                                 myList[index]),
                                                   );
-                                                  Navigator.of(context)
+                                                  await Navigator.of(context)
                                                       .push(route);
+
+                                                  print(
+                                                      'back to current screen');
+                                                  getData();
                                                 },
                                                 child: Row(
                                                   children: [
