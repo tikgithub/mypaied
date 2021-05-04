@@ -30,6 +30,9 @@ class _LoginScreenState extends State<LoginScreen> {
   //Progressbar dialog
   ProgressDialog progressDialog;
 
+  //CheckBox Remember me
+  bool rememberMe = false;
+
   Widget showLogo() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.5,
@@ -53,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
           keyboardType: TextInputType.text,
           textAlign: TextAlign.center,
           decoration: InputDecoration(
-            labelText: 'Username',
+            labelText: 'ຊື່ຜູ້ໃຊ້',
             labelStyle: TextStyle(color: Colors.white, fontSize: 18),
           ),
           validator: (value) {
@@ -81,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
           obscureText: true,
           textAlign: TextAlign.center,
           decoration: InputDecoration(
-            labelText: 'Password',
+            labelText: 'ລະຫັດຜ່ານ',
             labelStyle: TextStyle(color: Colors.white, fontSize: 18),
           ),
           validator: (value) {
@@ -108,18 +111,12 @@ class _LoginScreenState extends State<LoginScreen> {
               formKey.currentState.save();
               processingDialog.show();
               FirebaseAuth auth = FirebaseAuth.instance;
-              auth
-                  .signInWithEmailAndPassword(
-                      email: txtUsername.text.trim(),
-                      password: txtPassword.text.trim())
-                  .then((value) async {
+              auth.signInWithEmailAndPassword(email: txtUsername.text.trim(), password: txtPassword.text.trim()).then((value) async {
                 //Close ProgressIndicator
                 await processingDialog.close();
                 //Goto Home Screen
-                MaterialPageRoute route =
-                    MaterialPageRoute(builder: (value) => Home());
-                Navigator.of(context)
-                    .pushAndRemoveUntil(route, (route) => false);
+                MaterialPageRoute route = MaterialPageRoute(builder: (value) => Home());
+                Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
               }).catchError((error) {
                 print(error);
 
@@ -137,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 width: 10,
               ),
               Text(
-                'Login',
+                'ເຂົ້າລະບົບ',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
             ],
@@ -195,6 +192,23 @@ class _LoginScreenState extends State<LoginScreen> {
     ).then((value) => progressDialog.hide());
   }
 
+  Widget showRememberMe() {
+    return Container(
+      child: Row(
+        children: [
+          Text("ຈື່ການເຂົ້າລະບົບປະຈຸບັນໄວ້"),
+          Checkbox(
+              value: this.rememberMe,
+              onChanged: (bool value) {
+                setState(() {
+                  this.rememberMe = value;
+                });
+              })
+        ],
+      ),
+    );
+  }
+
   Widget showContent() {
     return Container(
       child: Stack(
@@ -225,6 +239,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           showUsername(),
                           showPassword(),
+                          showRememberMe(),
                           showLoginButton(),
                         ],
                       )),
@@ -257,10 +272,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     //create new Instance
-    processingDialog = new ProcessingDialog(
-        context, 'Please Wait While User information is Authorizing');
+    processingDialog = new ProcessingDialog(context, 'Please Wait While User information is Authorizing');
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -277,13 +290,11 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        label: Text('Register'),
+        label: Text('ລົງທະບຽນ'),
         icon: Icon(Icons.app_registration),
         onPressed: () {
-          MaterialPageRoute materialPageRoute =
-              MaterialPageRoute(builder: (value) => Register());
-          Navigator.of(context)
-              .pushAndRemoveUntil(materialPageRoute, (route) => false);
+          MaterialPageRoute materialPageRoute = MaterialPageRoute(builder: (value) => Register());
+          Navigator.of(context).pushAndRemoveUntil(materialPageRoute, (route) => false);
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

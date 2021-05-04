@@ -53,15 +53,11 @@ class _HomeState extends State<Home> {
       });
 
       imageFileName = await getImage().catchError((err) {
-        MaterialPageRoute loginPage =
-            new MaterialPageRoute(builder: (BuildContext ctx) => LoginScreen());
+        MaterialPageRoute loginPage = new MaterialPageRoute(builder: (BuildContext ctx) => LoginScreen());
         Navigator.of(context).pushAndRemoveUntil(loginPage, (route) => false);
       });
       print('Image name $imageFileName');
-      firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
-          .ref()
-          .child('Users')
-          .child(imageFileName);
+      firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref().child('Users').child(imageFileName);
       urlProfile = await ref.getDownloadURL();
       print(urlProfile);
       setState(() {
@@ -78,10 +74,8 @@ class _HomeState extends State<Home> {
 
   Future<String> getImage() async {
     var client = new Dio();
-    client.options.headers['authorization'] =
-        'Bearer ' + await FirebaseAuth.instance.currentUser.getIdToken(true);
-    Response<String> response =
-        await client.get(Config().getHostName() + 'user/getUserbyEmail');
+    client.options.headers['authorization'] = 'Bearer ' + await FirebaseAuth.instance.currentUser.getIdToken(true);
+    Response<String> response = await client.get(Config().getHostName() + 'user/getUserbyEmail');
     // Map databody = response.data;
     Map data = jsonDecode(response.data);
     return data['photo'].toString();
@@ -103,8 +97,7 @@ class _HomeState extends State<Home> {
 
   Future signOut() async {
     await FirebaseAuth.instance.signOut();
-    MaterialPageRoute route =
-        MaterialPageRoute(builder: (value) => LoginScreen());
+    MaterialPageRoute route = MaterialPageRoute(builder: (value) => LoginScreen());
     Navigator.of(context).pushAndRemoveUntil(route, (value) => false);
   }
 
@@ -156,37 +149,37 @@ class _HomeState extends State<Home> {
 
   Widget fullBody() {
     return Scaffold(
-      drawer: Drawer(
-        child: ListView(
-          // Important: Remove any padding from the ListView.
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            Container(
-              height: 300,
-              child: DrawerHeader(
-                child: showPhoto(),
-                decoration: BoxDecoration(
-                  color: Colors.blueGrey,
-                ),
-              ),
-            ),
-            ListTile(
-              title: Text('Item 1'),
-              onTap: () {
-                // Update the state of the app.
-                // ...
-              },
-            ),
-            ListTile(
-              title: Text('Item 2'),
-              onTap: () {
-                // Update the state of the app.
-                // ...
-              },
-            ),
-          ],
-        ),
-      ),
+      // drawer: Drawer(
+      //   child: ListView(
+      //     // Important: Remove any padding from the ListView.
+      //     padding: EdgeInsets.zero,
+      //     children: <Widget>[
+      //       Container(
+      //         height: 300,
+      //         child: DrawerHeader(
+      //           child: showPhoto(),
+      //           decoration: BoxDecoration(
+      //             color: Colors.blueGrey,
+      //           ),
+      //         ),
+      //       ),
+      //       ListTile(
+      //         title: Text('Item 1'),
+      //         onTap: () {
+      //           // Update the state of the app.
+      //           // ...
+      //         },
+      //       ),
+      //       ListTile(
+      //         title: Text('Item 2'),
+      //         onTap: () {
+      //           // Update the state of the app.
+      //           // ...
+      //         },
+      //       ),
+      //     ],
+      //   ),
+      // ),
       appBar: AppBar(
         actions: [
           IconButton(
@@ -201,7 +194,10 @@ class _HomeState extends State<Home> {
             SizedBox(
               width: 10,
             ),
-            Text('ເມນູ', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+            Text(
+              'ເມນູ',
+              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+            ),
           ],
         ),
       ),

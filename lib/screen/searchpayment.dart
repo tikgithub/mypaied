@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:mypaied/model/config.dart';
 import 'package:mypaied/screen/editscreen.dart';
 import 'package:mypaied/widget/progressdialog.dart';
+import '../model/config.dart';
 import 'detailscreen.dart';
 
 class SearchPayment extends StatefulWidget {
@@ -22,6 +23,7 @@ class _SearchPaymentState extends State<SearchPayment> {
   String fromDatePicker;
   dynamic totalSum = 0;
   ProcessingDialog prdlog;
+  int deleteId;
 
   List myList = new List();
 
@@ -41,16 +43,8 @@ class _SearchPaymentState extends State<SearchPayment> {
     totalSum = 0;
     try {
       var client = new Dio();
-      client.options.headers['Authorization'] =
-          "Bearer " + await FirebaseAuth.instance.currentUser.getIdToken(true);
-      Response<Map> res = await client.get(Config().getHostName() +
-          "payment/search/${formatDate(fromDate, [
-            dd,
-            '-',
-            mm,
-            '-',
-            yyyy
-          ])}/${formatDate(toDate, [dd, '-', mm, '-', yyyy])}");
+      client.options.headers['Authorization'] = "Bearer " + await FirebaseAuth.instance.currentUser.getIdToken(true);
+      Response<Map> res = await client.get(Config().getHostName() + "payment/search/${formatDate(fromDate, [dd, '-', mm, '-', yyyy])}/${formatDate(toDate, [dd, '-', mm, '-', yyyy])}");
 
       Map<String, dynamic> total = res.data['total'][0];
       Map<String, dynamic> listData;
@@ -69,11 +63,7 @@ class _SearchPaymentState extends State<SearchPayment> {
   }
 
   Future<void> _setFromDate(BuildContext ctx) async {
-    DateTime fromPickDate = await showDatePicker(
-        context: ctx,
-        initialDate: fromDate,
-        firstDate: DateTime(2015),
-        lastDate: DateTime(2050));
+    DateTime fromPickDate = await showDatePicker(context: ctx, initialDate: fromDate, firstDate: DateTime(2015), lastDate: DateTime(2050));
     if (fromPickDate != null) {
       setState(() {
         fromDate = fromPickDate;
@@ -82,11 +72,7 @@ class _SearchPaymentState extends State<SearchPayment> {
   }
 
   Future<void> _setToDate(BuildContext ctx) async {
-    DateTime toPickDate = await showDatePicker(
-        context: ctx,
-        initialDate: toDate,
-        firstDate: DateTime(2015),
-        lastDate: DateTime(2050));
+    DateTime toPickDate = await showDatePicker(context: ctx, initialDate: toDate, firstDate: DateTime(2015), lastDate: DateTime(2050));
     if (toPickDate != null) {
       setState(() {
         toDate = toPickDate;
@@ -98,266 +84,275 @@ class _SearchPaymentState extends State<SearchPayment> {
   Widget build(BuildContext context) {
     prdlog = new ProcessingDialog(context, "ກະລຸນາລໍຖ້າ");
     return Scaffold(
-        appBar: AppBar(
-          actions: [
-            IconButton(
-                icon: Icon(Icons.refresh),
-                onPressed: () {
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (BuildContext cts) => SearchPayment(),
-                      ));
-                })
-          ],
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'ຄົ້ນຫາລາຍການ',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                'ວັນທີ່ ${formatDate(fromDate, [
-                  dd,
-                  '/',
-                  mm,
-                  '/',
-                  yyyy
-                ])} - ${formatDate(
-                  toDate,
-                  [dd, '/', mm, '/', yyyy],
-                )}',
-                style: TextStyle(
-                  fontSize: 15,
-                ),
-              ),
-            ],
-          ),
-        ),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+      appBar: AppBar(
+        actions: [
+          IconButton(
+              icon: Icon(Icons.refresh),
+              onPressed: () {
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext cts) => SearchPayment(),
+                    ));
+              })
+        ],
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: EdgeInsets.only(left: 2, right: 10),
-              child: Column(
-                children: [
-                  Container(
-                    padding: EdgeInsets.only(left: 5, right: 10, top: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'ຈາກ: ' +
-                              formatDate(fromDate, [dd, '/', mm, '/', yyyy]),
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+            Text(
+              'ຄົ້ນຫາລາຍການ',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              'ວັນທີ່ ${formatDate(fromDate, [dd, '/', mm, '/', yyyy])} - ${formatDate(
+                toDate,
+                [dd, '/', mm, '/', yyyy],
+              )}',
+              style: TextStyle(
+                fontSize: 15,
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.only(left: 2, right: 10),
+            child: Column(
+              children: [
+                Container(
+                  padding: EdgeInsets.only(left: 5, right: 10, top: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'ຈາກ: ' + formatDate(fromDate, [dd, '/', mm, '/', yyyy]),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
-                        GestureDetector(
-                          child: Text(
-                            'ເລືອກ',
-                          ),
-                          onTap: () {
-                            _setFromDate(context);
-                          },
-                        )
-                      ],
-                    ),
+                      ),
+                      GestureDetector(
+                        child: Text(
+                          'ເລືອກ',
+                        ),
+                        onTap: () {
+                          _setFromDate(context);
+                        },
+                      )
+                    ],
                   ),
-                  Container(
-                    padding: EdgeInsets.only(left: 5, right: 10, top: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'ເຖິງ: ' +
-                              formatDate(toDate, [dd, '/', mm, '/', yyyy]),
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        GestureDetector(
-                          child: Text(
-                            'ເລືອກ',
-                          ),
-                          onTap: () {
-                            _setToDate(context);
-                          },
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.only(right: 10),
-              child: ElevatedButton(
-                onPressed: () {
-                  getData();
-                },
-                child: Row(
-                  children: [
-                    Icon(Icons.search),
-                    Text('ຄົ້ນຫາ'),
-                  ],
-                  mainAxisSize: MainAxisSize.min,
                 ),
-              ),
+                Container(
+                  padding: EdgeInsets.only(left: 5, right: 10, top: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'ເຖິງ: ' + formatDate(toDate, [dd, '/', mm, '/', yyyy]),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      GestureDetector(
+                        child: Text(
+                          'ເລືອກ',
+                        ),
+                        onTap: () {
+                          _setToDate(context);
+                        },
+                      )
+                    ],
+                  ),
+                )
+              ],
             ),
-            SizedBox(
-              height: 5,
-            ),
-            Container(
-              height: 1,
-              color: Colors.black12,
-            ),
-            Container(
-              padding: EdgeInsets.only(top: 20, left: 5),
+          ),
+          Container(
+            padding: EdgeInsets.only(right: 10),
+            child: ElevatedButton(
+              onPressed: () {
+                getData();
+              },
               child: Row(
                 children: [
-                  Text(
-                    'ຈຳນວນເງິນ: ',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    this.totalSum.toString() + " LAK",
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red),
-                  ),
+                  Icon(Icons.search),
+                  Text('ຄົ້ນຫາ'),
                 ],
+                mainAxisSize: MainAxisSize.min,
               ),
             ),
-            SizedBox(
-              height: 20,
+          ),
+          SizedBox(
+            height: 5,
+          ),
+          Container(
+            height: 1,
+            color: Colors.black12,
+          ),
+          Container(
+            padding: EdgeInsets.only(top: 20, left: 5),
+            child: Row(
+              children: [
+                Text(
+                  'ຈຳນວນເງິນ: ',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  this.totalSum.toString() + " LAK",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.red),
+                ),
+              ],
             ),
-            Container(
-              height: 1,
-              color: Colors.black12,
-            ),
-            myList.length == 0
-                ? Container(
-                    padding: EdgeInsets.only(top: 10),
-                    child: Text('ບໍ່ມີຂໍ້ມູນ'),
-                  )
-                : Expanded(
-                    child: ListView.separated(
-                        separatorBuilder: (context, index) {
-                          return Divider();
-                        },
-                        itemCount: myList.length,
-                        itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      myList[index]['item'],
-                                      style: TextStyle(
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Container(
+            height: 1,
+            color: Colors.black12,
+          ),
+          myList.length == 0
+              ? Container(
+                  padding: EdgeInsets.only(top: 10),
+                  child: Text('ບໍ່ມີຂໍ້ມູນ'),
+                )
+              : Expanded(
+                  child: ListView.separated(
+                      separatorBuilder: (context, index) {
+                        return Divider();
+                      },
+                      itemCount: myList.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    myList[index]['item'],
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                  ),
+                                  Text(
+                                    format.format(myList[index]['amount']) + " LAK",
+                                    style: TextStyle(color: Colors.red),
+                                  )
+                                ],
+                              ),
+                              Text(formatDate(DateTime.parse(myList[index]['pay_date']), [dd, '/', mm, '/', yyyy])),
+                            ],
+                          ),
+                          onTap: () {
+                            MaterialPageRoute detailScreen = new MaterialPageRoute(builder: (BuildContext ctx) => PaymentDetail(myList[index]));
+                            Navigator.of(context).push(detailScreen);
+                          },
+                          onLongPress: () {
+                            //print(myList[index]);
+                            this.deleteId = (myList[index]['id']);
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext ctx) {
+                                  return AlertDialog(
+                                      title: Text(
+                                        "ລາຍການ",
+                                        style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 18),
-                                    ),
-                                    Text(
-                                      format.format(myList[index]['amount']) +
-                                          " LAK",
-                                      style: TextStyle(color: Colors.red),
-                                    )
-                                  ],
-                                ),
-                                Text(formatDate(
-                                    DateTime.parse(myList[index]['pay_date']),
-                                    [dd, '/', mm, '/', yyyy])),
-                              ],
-                            ),
-                            onTap: () {
-                              MaterialPageRoute detailScreen =
-                                  new MaterialPageRoute(
-                                      builder: (BuildContext ctx) =>
-                                          PaymentDetail(myList[index]));
-                              Navigator.of(context).push(detailScreen);
-                            },
-                            onLongPress: () {
-                              showDialog(
-                                  context: context,
-                                  builder: (BuildContext ctx) {
-                                    return AlertDialog(
-                                        title: Text(
-                                          "ລາຍການ",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 18,
-                                          ),
+                                          fontSize: 18,
                                         ),
-                                        content: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Container(
-                                              child: TextButton(
-                                                onPressed: () async {
-                                                  Navigator.of(context).pop();
-                                                  MaterialPageRoute route =
-                                                      new MaterialPageRoute(
-                                                    builder: (BuildContext
-                                                            ctx) =>
-                                                        PaymentEditScreen(
-                                                            data:
-                                                                myList[index]),
-                                                  );
-                                                  await Navigator.of(context)
-                                                      .push(route);
+                                      ),
+                                      content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                            child: TextButton(
+                                              onPressed: () async {
+                                                Navigator.of(context).pop();
+                                                MaterialPageRoute route = new MaterialPageRoute(
+                                                  builder: (BuildContext ctx) => PaymentEditScreen(data: myList[index]),
+                                                );
+                                                await Navigator.of(context).push(route);
 
-                                                  print(
-                                                      'back to current screen');
-                                                  getData();
-                                                },
-                                                child: Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.edit,
-                                                      color: Colors.orange,
-                                                    ),
-                                                    Text("   ແກ້ໄຂ"),
-                                                  ],
-                                                ),
+                                                print('back to current screen');
+                                                getData();
+                                              },
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.edit,
+                                                    color: Colors.orange,
+                                                  ),
+                                                  Text("   ແກ້ໄຂ"),
+                                                ],
                                               ),
-                                              width: double.infinity,
                                             ),
-                                            Container(
-                                              height: 1,
-                                              color: Colors.black12,
-                                            ),
-                                            Container(
-                                              child: TextButton(
-                                                onPressed: () {},
-                                                child: Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.delete,
-                                                      color: Colors.red,
-                                                    ),
-                                                    Text("   ລຶບ"),
-                                                  ],
-                                                ),
+                                            width: double.infinity,
+                                          ),
+                                          Container(
+                                            height: 1,
+                                            color: Colors.black12,
+                                          ),
+                                          Container(
+                                            child: TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                                showDialog(
+                                                    context: context,
+                                                    builder: (BuildContext ctx) {
+                                                      return AlertDialog(
+                                                        title: Text("ຕ້ອງການລຶບລາຍການນີ້ບໍ່ ?"),
+                                                        actions: [
+                                                          ElevatedButton(
+                                                            onPressed: () async {
+                                                              var client = new Dio();
+                                                              client.options.headers['Authorization'] = "Bearer " + await FirebaseAuth.instance.currentUser.getIdToken(true);
+                                                              client.delete(Config().getHostName() + "payment/" + this.deleteId.toString()).whenComplete(() {
+                                                                Navigator.pop(context);
+
+                                                                getData();
+                                                              }).catchError((err) {
+                                                                Navigator.pop(context);
+                                                                getData();
+                                                              });
+                                                            },
+                                                            child: Text('ຕົກລົງ'),
+                                                            style: ButtonStyle(
+                                                              backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
+                                                            ),
+                                                          ),
+                                                          ElevatedButton(
+                                                            onPressed: () {
+                                                              Navigator.pop(context);
+                                                            },
+                                                            child: Text('ຍົກເລີກ'),
+                                                          ),
+                                                        ],
+                                                      );
+                                                    });
+                                              },
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.delete,
+                                                    color: Colors.red,
+                                                  ),
+                                                  Text("   ລຶບ")
+                                                ],
                                               ),
-                                              width: double.infinity,
                                             ),
-                                          ],
-                                        ));
-                                  });
-                            },
-                          );
-                        }),
-                  ),
-          ],
-        ));
+                                            width: double.infinity,
+                                          ),
+                                        ],
+                                      ));
+                                });
+                          },
+                        );
+                      }),
+                ),
+        ],
+      ),
+    );
   }
 }

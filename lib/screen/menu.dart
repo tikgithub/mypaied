@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mypaied/screen/addnewpayment.dart';
 import 'package:mypaied/screen/history.dart';
 import 'package:mypaied/screen/paymentpurpose.dart';
+import 'package:mypaied/screen/profile.dart';
 import 'package:mypaied/screen/searchpayment.dart';
 import 'package:mypaied/screen/simplelazyloading.dart';
 
@@ -34,8 +35,7 @@ class _MenuState extends State<Menu> {
             ))),
         child: TextButton(
           onPressed: () {
-            MaterialPageRoute historypage =
-                new MaterialPageRoute(builder: (BuildContext ctx) => screen);
+            MaterialPageRoute historypage = new MaterialPageRoute(builder: (BuildContext ctx) => screen);
             Navigator.of(context).push(historypage);
           },
           child: Row(
@@ -50,10 +50,7 @@ class _MenuState extends State<Menu> {
               ),
               Text(
                 label,
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
               )
             ],
           ),
@@ -66,10 +63,8 @@ class _MenuState extends State<Menu> {
           child: Column(
             children: [
               menuBlock('images/statement.png', 'ປະຫວັດລາຍຈ່າຍ', Hisotry()),
-              menuBlock(
-                  'images/money-bag.png', 'ຄົ້ນຫາລາຍຈ່າຍ', SearchPayment()),
-              menuBlock(
-                  'images/accountant.png', 'ສ້າງລາຍຈ່າຍສະເພາະ', Hisotry()),
+              menuBlock('images/money-bag.png', 'ຄົ້ນຫາລາຍຈ່າຍ', SearchPayment()),
+              menuBlock('images/avatar.png', 'Profile', Profile()),
             ],
           ),
         ),
@@ -80,17 +75,18 @@ class _MenuState extends State<Menu> {
             ),
             FloatingActionButton(
               onPressed: () {
-                MaterialPageRoute router = new MaterialPageRoute(builder: (BuildContext ctx)=>PaymentPurpose());
+                MaterialPageRoute router = new MaterialPageRoute(builder: (BuildContext ctx) => PaymentPurpose());
                 Navigator.of(context).push(router);
               },
               child: Icon(Icons.payments),
               heroTag: '01',
             ),
-            SizedBox(width: 10,),
+            SizedBox(
+              width: 10,
+            ),
             FloatingActionButton(
               onPressed: () {
-                MaterialPageRoute router = new MaterialPageRoute(
-                    builder: (BuildContext ctx) => AddPayment());
+                MaterialPageRoute router = new MaterialPageRoute(builder: (BuildContext ctx) => AddPayment());
                 Navigator.of(context).push(router);
               },
               child: Icon(Icons.add),
